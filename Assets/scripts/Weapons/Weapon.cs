@@ -177,6 +177,7 @@ namespace Weapons
 
 		void AttemptToFireWeapon()
 		{
+			
 			//ignore if we are hovering over UI
 			if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
 				return;
@@ -204,8 +205,7 @@ namespace Weapons
 						//fire a single round if its a semi or automatic weapon
 						if (WeaponType == WeaponType.SemiAutomatic || WeaponType == WeaponType.FullyAutomatic) {
 							Vector2 dir = (Camera.main.ScreenToWorldPoint (Input.mousePosition) - PlayerManager.LocalPlayer.transform.position).normalized;
-							PlayerManager.LocalPlayerScript.weaponNetworkActions.CmdShootBullet(dir, Projectile.name);
-							CurrentMagazine.ammoRemains--; //TODO: remove more bullets if burst
+							PlayerManager.LocalPlayerScript.weaponNetworkActions.CmdShootBullet(CurrentMagazine.gameObject, dir, Projectile.name);
 						}
 
 						if (WeaponType == WeaponType.FullyAutomatic) {
