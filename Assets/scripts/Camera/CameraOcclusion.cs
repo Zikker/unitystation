@@ -16,6 +16,7 @@ public class CameraOcclusion : MonoBehaviour
     private Vector3 lastPosition;
     private Vector2 lastDirection;
     public int WallLayer = 9;
+	public bool includeLights = false;
 
 	GameObject ShroudContainer;
 
@@ -47,7 +48,9 @@ public class CameraOcclusion : MonoBehaviour
 
 	public void UpdateShroud() {
 		GizmoRays.Clear ();
+		if(includeLights)
 		EventManager.UpdateLights();
+		
 		transform.hasChanged = false;
 
 		//if (transform.position == lastPosition && GetSightSourceDirection() == lastDirection)
@@ -222,7 +225,10 @@ public class CameraOcclusion : MonoBehaviour
 
 		var spriteRenderer = shroud.GetComponent<SpriteRenderer>();
 		if (spriteRenderer != null) {
-			//spriteRenderer.enabled = enabled;
+			if (!includeLights) {
+				spriteRenderer.enabled = enabled;
+				return;
+			}
 
 			//if this tile has no shroud, get its lighting information
 			if (!enabled) {
