@@ -11,7 +11,7 @@ namespace Lighting
 	{
 		public ObjectTrigger[] TriggeringObjects;
 
-        [SyncVar(hook = "SyncLightSwitch")]
+		[SyncVar(hook = "SyncLightSwitch")]
 		public bool isOn = true;
 		private SpriteRenderer spriteRenderer;
 		public Sprite lightOn;
@@ -25,37 +25,46 @@ namespace Lighting
 			clickSFX = GetComponent<AudioSource>();
 		}
 
+		public override void OnStartClient()
+		{
+			SyncLightSwitch(isOn);
+		}
+
 		public override void Interact()
 		{
 			if (!PlayerManager.LocalPlayerScript.IsInReach(spriteRenderer.transform, 1f))
 				return;
+
+			if (switchCoolDown)
+				return;
 			
-			if (!switchCoolDown) {
-				switchCoolDown = true;
-				StartCoroutine(CoolDown());
-				Debug.Log("LIGHT SWITCHES DISABLED UNTIL v2");
-//                PlayerManager.LocalPlayerScript.playerNetworkActions.CmdToggleLightSwitch(gameObject);
-			}
+			StartCoroutine(CoolDown());
+			PlayerManager.LocalPlayerScript.playerNetworkActions.CmdToggleLightSwitch(gameObject);
 		}
 
 		IEnumerator CoolDown()
 		{
+			switchCoolDown = true;
 			yield return new WaitForSeconds(0.2f);
 			switchCoolDown = false;
 		}
-          
-		void SyncLightSwitch(bool _on)
+
+		void SyncLightSwitch(bool state)
 		{
-			foreach (var s in TriggeringObjects) {
-				s.Trigger(_on);
+			if (TriggeringObjects != null) {
+				foreach (var s in TriggeringObjects) {
+					if (s != null) {
+						s.Trigger(state);
+					}
+				}
 			}
 
-			if (!_on) {
-				spriteRenderer.sprite = lightOff;
+			if (clickSFX != null) {
 				clickSFX.Play();
-			} else {
-				spriteRenderer.sprite = lightOn;
-				clickSFX.Play();
+			}
+
+			if (spriteRenderer != null) {
+				spriteRenderer.sprite = state ? lightOn : lightOff;
 			}
 		}
 	}
